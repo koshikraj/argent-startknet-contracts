@@ -10,6 +10,11 @@ from starkware.starknet.common.syscalls import (
     get_contract_address,
 )
 
+from starkware.starknet.common.syscalls import (
+    get_block_number,
+    get_block_timestamp,
+)
+
 from contracts.utils.calls import (
     CallArray,
     execute_call_array,
@@ -250,6 +255,34 @@ func changeSigner{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_pt
 ) {
     ArgentModel.change_signer(newSigner);
     return ();
+}
+
+@external
+func setBeneficiary{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    beneficiary: felt, 
+    dday: felt
+) {
+    let (block_timestamp) = get_block_timestamp();
+    ArgentModel.set_beneficairy(beneficiary, block_timestamp + dday);
+    return ();
+}
+
+// TODO: Inititate by the guardian instead of self
+@external
+func recoverAccount{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+    beneficiary: felt
+) {
+    let (ben) = ArgentModel.get_beneficiary();
+
+    let (block_timestamp) = get_block_timestamp();
+    let (dday) = ArgentModel.get_dday();
+
+    // Check the recovery condition
+    // block_timestamp != dday
+
+    ArgentModel.change_signer(ben);
+    return ();
+    
 }
 
 @external

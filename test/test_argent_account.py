@@ -287,6 +287,40 @@ async def test_change_signer(contract_factory):
     assert (await account.getSigner().call()).result.signer == (new_signer.public_key)
 
 @pytest.mark.asyncio
+async def test_set_beneficairy(contract_factory):
+    account, _, dapp = contract_factory
+    sender = TransactionSender(account)
+
+    assert (await account.getSigner().call()).result.signer == (signer.public_key)
+
+    # should revert with the wrong signer
+    await assert_revert(
+        sender.send_transaction([(account.contract_address, 'setBeneficiary', [new_signer.public_key])], [wrong_signer, guardian]),
+        "argent: signer signature invalid"
+    )
+
+    # should revert with the wrong guardian signer
+    await assert_revert(
+        sender.send_transaction([(account.contract_address, 'setBeneficiary', [new_signer.public_key])], [signer, wrong_guardian]),
+        "argent: guardian signature invalid"
+    )
+
+    # should work with the correct signers
+    tx_exec_info = await sender.send_transaction([(account.contract_address, 'setBeneficiary', [new_signer.public_key, 0])], [signer, guardian])
+
+
+    # tx_exec_info = await sender.send_transaction([(account.contract_address, 'recoverAccount', [new_signer.public_key])], [signer, guardian])
+    
+    # assert_event_emitted(
+    #     tx_exec_info,
+    #     from_address=account.contract_address,
+    #     name='signer_changed',
+    #     data=[new_signer.public_key]
+    # )
+
+    # assert (await account.getSigner().call()).result.signer == (new_signer.public_key)    
+
+@pytest.mark.asyncio
 async def test_change_guardian(contract_factory):
     account, _, dapp = contract_factory
     sender = TransactionSender(account)

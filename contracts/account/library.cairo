@@ -84,6 +84,14 @@ func _signer() -> (res: felt) {
 }
 
 @storage_var
+func _beneficiary() -> (res: felt) {
+}
+
+@storage_var
+func _dday() -> (res: felt) {
+}
+
+@storage_var
 func _guardian() -> (res: felt) {
 }
 
@@ -244,6 +252,27 @@ namespace ArgentModel {
         // change guardian
         _guardian.write(new_guardian);
         guardian_changed.emit(new_guardian=new_guardian);
+        return ();
+    }
+
+
+    func set_beneficairy{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}(
+        beneficiary: felt,
+        dday: felt
+    ) {
+        alloc_locals;
+
+        // only called via execute
+        assert_only_self();
+
+        if (beneficiary == 0) {
+            with_attr error_message("argent: beneficiary invalid") {
+            }
+        }
+
+        // set beneficairy
+        _beneficiary.write(beneficiary);
+        _dday.write(dday);
         return ();
     }
 
@@ -430,6 +459,22 @@ namespace ArgentModel {
         let (res) = _guardian.read();
         return (guardian=res);
     }
+
+    func get_beneficiary{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
+        beneficiary: felt
+    ) {
+        let (res) = _beneficiary.read();
+        return (beneficiary=res);
+    }
+
+    func get_dday{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
+        dday: felt
+    ) {
+        let (res) = _dday.read();
+        return (dday=res);
+    }
+
+    
 
     func get_guardian_backup{syscall_ptr: felt*, pedersen_ptr: HashBuiltin*, range_check_ptr}() -> (
         guardian_backup: felt
